@@ -1,0 +1,30 @@
+{
+    "sourceFile": "models/todos/sub_todo.models.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 3,
+            "patches": [
+                {
+                    "date": 1724224488510,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1724224747952,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -0,0 +1,5 @@\n+import mongoose from \"mongoose\";\r\n+\r\n+const subTodoSchema = new mongoose.Schema({},{timestamps: true})\r\n+\r\n+export const SubTodo = mongoose.model(\"SubTodo\", subTodoSchema )\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1724227573925,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,5 +1,14 @@\n import mongoose from \"mongoose\";\r\n \r\n-const subTodoSchema = new mongoose.Schema({},{timestamps: true})\r\n+const subTodoSchema = new mongoose.Schema({\r\n+    content: {\r\n+        type: String,\r\n+        required: true\r\n+    },\r\n+    complete:{\r\n+        type: Boolean,\r\n+        default: false\r\n+    }\r\n+},{timestamps: true})\r\n \r\n export const SubTodo = mongoose.model(\"SubTodo\", subTodoSchema )\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1724231398558,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -7,8 +7,12 @@\n     },\r\n     complete:{\r\n         type: Boolean,\r\n         default: false\r\n+    },\r\n+    createdBy: {\r\n+        type: mongoose.Schema.Types.ObjectId,\r\n+        ref: \"User\"\r\n     }\r\n },{timestamps: true})\r\n \r\n export const SubTodo = mongoose.model(\"SubTodo\", subTodoSchema )\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1724224488510,
+            "name": "Commit-0",
+            "content": ""
+        }
+    ]
+}

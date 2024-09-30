@@ -1,0 +1,42 @@
+{
+    "sourceFile": "models/todos/user.models.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 6,
+            "patches": [
+                {
+                    "date": 1724224476947,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1724233376158,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -21,5 +21,5 @@\n },\r\n {timestamps: true}\r\n )\r\n \r\n-export const User = mongoose.model(\"User\" , userSchema)\n\\ No newline at end of file\n+export const User = mongoose.model(\"User\" , userSchema);\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1724233408219,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -21,5 +21,5 @@\n },\r\n {timestamps: true}\r\n )\r\n \r\n-export const User = mongoose.model(\"User\" , userSchema);\n\\ No newline at end of file\n+export default const User = mongoose.model(\"User\" , userSchema);\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1724233441624,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -21,5 +21,5 @@\n },\r\n {timestamps: true}\r\n )\r\n \r\n-export default const User = mongoose.model(\"User\" , userSchema);\n\\ No newline at end of file\n+export const User = mongoose.model(\"User\" , userSchema);\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1724233504217,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -21,5 +21,5 @@\n },\r\n {timestamps: true}\r\n )\r\n \r\n-export const User = mongoose.model(\"User\" , userSchema);\n\\ No newline at end of file\n+const User = mongoose.model(\"User\" , userSchema);\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1724233514099,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -21,5 +21,5 @@\n },\r\n {timestamps: true}\r\n )\r\n \r\n-const User = mongoose.model(\"User\" , userSchema);\n\\ No newline at end of file\n+export const User = mongoose.model(\"User\" , userSchema);\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1724233569073,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -18,8 +18,7 @@\n         type: String,\r\n         required: [true, \"password is required\"]\r\n     }\r\n },\r\n-{timestamps: true}\r\n )\r\n \r\n export const User = mongoose.model(\"User\" , userSchema);\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1724224476947,
+            "name": "Commit-0",
+            "content": "import mongoose from \"mongoose\";\r\n\r\nconst userSchema = new mongoose.Schema(\r\n    {\r\n    username: {\r\n        type: String,\r\n        required: true,\r\n        unique: true,\r\n        lowercase: true\r\n    },\r\n    email:{\r\n        type: String,\r\n        required: true,\r\n        unique: true,\r\n        lowercase: true\r\n    },\r\n    password: {\r\n        type: String,\r\n        required: [true, \"password is required\"]\r\n    }\r\n},\r\n{timestamps: true}\r\n)\r\n\r\nexport const User = mongoose.model(\"User\" , userSchema)"
+        }
+    ]
+}

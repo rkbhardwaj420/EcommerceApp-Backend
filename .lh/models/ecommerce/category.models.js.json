@@ -1,0 +1,22 @@
+{
+    "sourceFile": "models/ecommerce/category.models.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1724396926132,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1724397110106,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,6 +1,13 @@\n import mongoose from \"mongoose\";\r\n \r\n-const categorySchema = new mongoose.Schema({},{timestamps: true})\r\n+const categorySchema = new mongoose.Schema(\r\n+  {\r\n+    name: {\r\n\\ No newline at end of file\n+      type: String,\r\n+      required: true,\r\n+    },\r\n+  },\r\n+  { timestamps: true }\r\n+);\r\n \r\n-\r\n-export const Category = mongoose.model(\"Category\", categorySchema )\n+export const Category = mongoose.model(\"Category\", categorySchema);\r\n"
+                }
+            ],
+            "date": 1724396926132,
+            "name": "Commit-0",
+            "content": "import mongoose from \"mongoose\";\r\n\r\nconst categorySchema = new mongoose.Schema({},{timestamps: true})\r\n\r\n\r\nexport const Category = mongoose.model(\"Category\", categorySchema )"
+        }
+    ]
+}

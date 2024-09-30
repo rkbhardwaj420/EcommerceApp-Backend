@@ -1,0 +1,18 @@
+{
+    "sourceFile": "models/ecommerce/order.models.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1726467503213,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1726467503213,
+            "name": "Commit-0",
+            "content": "const mongoose = require('mongoose');\r\n\r\nconst orderSchema = new mongoose.Schema({\r\n  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },\r\n  products: [{\r\n    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },\r\n    quantity: { type: Number, required: true }\r\n  }],\r\n  totalAmount: { type: Number, required: true },\r\n  status: { type: String, enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'], default: 'Pending' },\r\n  createdAt: { type: Date, default: Date.now },\r\n  updatedAt: { type: Date, default: Date.now }\r\n});\r\n\r\nmodule.exports = mongoose.model('Order', orderSchema);\r\n"
+        }
+    ]
+}

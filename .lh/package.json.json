@@ -1,0 +1,18 @@
+{
+    "sourceFile": "package.json",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1724233390361,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1724233390361,
+            "name": "Commit-0",
+            "content": "{\n  \"name\": \"btest\",\n  \"version\": \"1.0.0\",\n  \"main\": \"index.js\",\n  \"type\": \"module\",\n  \"scripts\": {\n    \"start\": \"nodemon db.js\"\n  },\n  \"author\": \"rahul\",\n  \"license\": \"ISC\",\n  \"description\": \"\",\n  \"dependencies\": {\n    \"bcrypt\": \"^5.1.1\",\n    \"colors\": \"^1.4.0\",\n    \"cors\": \"^2.8.5\",\n    \"dotenv\": \"^16.4.5\",\n    \"express\": \"^4.19.2\",\n    \"mongodb\": \"^6.8.0\",\n    \"mongoose\": \"^8.5.2\",\n    \"morgan\": \"^1.10.0\"\n  },\n  \"devDependencies\": {\n    \"nodemon\": \"^3.1.4\"\n  }\n}\n"
+        }
+    ]
+}

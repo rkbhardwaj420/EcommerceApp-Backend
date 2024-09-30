@@ -1,0 +1,26 @@
+{
+    "sourceFile": "models/ecommerce/product.models.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 2,
+            "patches": [
+                {
+                    "date": 1724398268886,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1724406379878,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -5,9 +5,9 @@\n         required: true,\r\n         type: String,\r\n     },\r\n     name: {\r\n-        \r\n+\r\n     }\r\n },{timestamps: true})\r\n \r\n \r\n"
+                },
+                {
+                    "date": 1724406644796,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -9,9 +9,9 @@\n         required: true,\r\n         type: String,\r\n     },\r\n     productImage:{\r\n-        \r\n+\r\n     }\r\n },{timestamps: true})\r\n \r\n \r\n"
+                }
+            ],
+            "date": 1724398268886,
+            "name": "Commit-0",
+            "content": "import mongoose from \"mongoose\";\r\n\r\nconst productSchema = new mongoose.Schema({},{timestamps: true})\r\n\r\n\r\nexport const Product = mongoose.model(\"Product\", productSchema )\r\n"
+        }
+    ]
+}
