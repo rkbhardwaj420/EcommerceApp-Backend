@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import { Product } from './models/ecommerce/product.models.js'; // Adjust the path if necessary
 import { User } from './models/ecommerce/user.models.js'; // Assuming you have a User model defined
 import { Wishlist } from './models/ecommerce/Wishlist.models.js'; // Assuming you have a User model defined
+import {Cart} from './models/ecommerce/cart.models.js';
 dotenv.config();
 const app = express();
 const jwtKEYS = process.env.JWT_SECRET || "default-secret";
@@ -175,31 +176,6 @@ app.post('/createwishlist', async (req, res) => {
   }
 });
 
-
-
-
-
-
-// Get user's wishlist
-// app.get('/wishlist', async (req, res) => {
-//   try {
-//     const userId = "66f39b8bb45f445b1af4d178"; // You may want to get this dynamically, e.g., from req.user or req.params.
-
-//     // Fetch the wishlist and populate product details directly
-//     const wishlist = await Wishlist.findOne({ userId }).populate('items._id', 'title price image');
-
-//     if (!wishlist) {
-//       return res.status(404).json({ message: "Wishlist not found" });
-//     }
-
-//     // Return the wishlist with populated product details
-//     return res.status(200).json(wishlist);
-//   } catch (error) {
-//     return res.status(500).json({ message: "Error fetching wishlist", error: error.message });
-//   }
-// });
-
-
 app.get('/wishlist', async (req, res) => {
   try {
       const userId = "66f39b8bb45f445b1af4d178"; // You can get this from req.user or req.params dynamically.
@@ -223,17 +199,123 @@ app.get('/wishlist', async (req, res) => {
 });
 
 
-// Remove product from wishlist
-app.delete('/wishlist/:productId',  async (req, res) => {
-  try {
-    const { productId } = req.params;
 
-    const wishlist = await Wishlist.findOne({ userId: req.userId });
+// cart api's
+// Create or update cart
+app.post('/createcart', async (req, res) => {
+  try {
+    // Extract product details from the request body
+    const {  product_id } = req.body;
+    if (!product_id) return res.status(400).json("Please provide product id");
+
+    // Current logged-in user (hardcoded for now)
+    const user_id = "66f39b8bb45f445b1af4d178";
+    const cart = await Cart.findOne({ userId: user_id });
+
+    // If the cart exists, add the product to the cart items
+    if (cart) {
+      cart.items.push(product_id);
+      await cart.save();
+    } else {
+      // Create a new cart if it doesn't exist
+      const newCart = new Cart({
+        userId: user_id,
+        items: [product_id],
+      });
+      await newCart.save();
+    }
+
+    return res.status(201).json({ message: "Product added to cart" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error adding product to cart", error: error.message });
+  }
+});
+
+// Get cart details
+app.get('/getallcart', async (req, res) => {
+  try {
+    // Current logged-in user (hardcoded for now)
+    const userId = "66f39b8bb45f445b1af4d178";
+
+    // Fetch the cart and populate product details
+    const cart = await Cart.findOne({ userId })
+      .populate({
+        path: 'items',
+        select: 'title price image', // Specify which fields to return
+      });
+
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    // Return the cart with populated product details
+    return res.status(200).json(cart);
+  } catch (error) {
+    return res.status(500).json({ message: "Error fetching cart", error: error.message });
+  }
+});
+
+app.delete('/deletecart', async (req, res) => {
+  try {
+    // Extract product ID from the request body
+    const { product_id } = req.body;
+    if (!product_id) return res.status(400).json("Please provide product id");
+
+    // Current logged-in user (hardcoded for now)
+    const user_id = "66f39b8bb45f445b1af4d178";
+
+    // Find the user's cart
+    const cart = await Cart.findOne({ userId: user_id });
+
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    // Find the index of the product in the cart items
+    const itemIndex = cart.items.indexOf(product_id);
+    if (itemIndex === -1) {
+      return res.status(404).json({ message: "Product not found in cart" });
+    }
+
+    // Remove the product from the cart items
+    cart.items.splice(itemIndex, 1);
+    await cart.save();
+
+    return res.status(200).json({ message: "Product removed from cart" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error removing product from cart", error: error.message });
+  }
+});
+
+
+
+
+
+// Remove product from wishlist
+
+app.delete('/deletewishlist', async (req, res) => {
+  try {
+    // Extracting product ID from the request body
+    const { product_id } = req.body;
+    if (!product_id) return res.status(400).json("Please provide product id");
+
+    // Assuming Aman Sir is the current logged-in user
+    const user_id = "66f39b8bb45f445b1af4d178";
+
+    // Finding the wishlist of the user
+    const wishlist = await Wishlist.findOne({ userId: user_id });
+
     if (!wishlist) {
       return res.status(404).json({ message: "Wishlist not found" });
     }
 
-    wishlist.items = wishlist.items.filter(item => item.productId.toString() !== productId);
+    // Removing the product from the wishlist items
+    const itemIndex = wishlist.items.indexOf(product_id);
+    if (itemIndex === -1) {
+      return res.status(404).json({ message: "Product not found in wishlist" });
+    }
+
+    wishlist.items.splice(itemIndex, 1);
     await wishlist.save();
 
     return res.status(200).json({ message: "Product removed from wishlist" });
@@ -242,7 +324,6 @@ app.delete('/wishlist/:productId',  async (req, res) => {
   }
 });
 
-// Start the server
 app.listen(8201, () => {
   console.log("Server is running on port 8201");
 });
