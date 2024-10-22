@@ -8,6 +8,8 @@ import { Product } from "./models/ecommerce/product.models.js"; // Adjust the pa
 import { User } from "./models/ecommerce/user.models.js"; // Assuming you have a User model defined
 import { Wishlist } from "./models/ecommerce/Wishlist.models.js"; // Assuming you have a User model defined
 import { Cart } from "./models/ecommerce/cart.models.js";
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 dotenv.config();
 const app = express();
 const jwtKEYS = process.env.JWT_SECRET || "default-secret";
@@ -42,33 +44,120 @@ const verifyToken = (req, res, next) => {
 };
 
 // Routes
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // true for port 465, false for other ports
+  auth: {
+    user: "rahulwap420@gmail.com",
+    pass: "nkca kqrv tsdw sgeu",
+  },
+});
+const SendEmail = async () => {
+  try {
+    const info = await transporter.sendMail({
+      from: '"Maddison Foo Koch 👻" <rahulwap420@gmail.com>', // sender address
+      to: "bar@example.com, baz@example.com", // list of receivers
+      subject: "Hello ✔", // Subject line
+      text: "Hello world?", // plain text body
+      html: "<b>Hello world?</b>", // html body
+    });
+    console.log('Email sent: ', info.messageId); // Logs the message ID upon successful email sending
+  } catch (error) {
+    console.error('Error sending email:', error); // Logs any error that occurs during email sending
+  }
+};
+
+// Call the function to send the email
+SendEmail();
+
 
 // Create a new user
-app.post("/createuser", async (req, res) => {
+app.post('/createuser',async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password  , otp } = req.body;
+
+    // Validate input
     if (!email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: 'All fields are required' });
     }
 
-    const existingUser = await User.findOne({ $or: [ { email }] });
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: "Username or Email already exists" });
+      return res.status(400).json({ message: 'Email already exists' });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({email, password: hashedPassword });
+
+    // Generate OTP and set expiry (e.g., 10 minutes from now)
+    const verificationCode = crypto.randomInt(100000, 999999).toString(); // 6-digit OTP
+    const verificationCodeExpiry = new Date(Date.now() + 10 * 60 * 1000); // Expires in 10 minutes
+
+    // Create new user
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      verificationCode,
+      verificationCodeExpiry,
+    });
     await newUser.save();
 
-    return res.status(201).json({ message: "User created successfully" });
+    // Send the OTP via email
+    const mailOptions = {
+      from: '"appmail" <rahulwap420@gmail.com>',
+      to: newUser.email,
+      subject: 'Your OTP for Email Verification',
+      text: `Your OTP is ${verificationCode}. It will expire in 10 minutes.`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return res.status(201).json({
+      message: 'User created successfully. Please check your email for the OTP.',
+    });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Server error", error: error.message });
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+//verify otp
+
+app.post("/otpverification", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    // Validate input
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and OTP are required" });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if OTP matches
+    if (user.verificationCode === otp) {
+      // Update user's verification status
+      await User.updateOne(
+        { email },
+        { $set: { isVerified: true, verificationCode: null } }
+      );
+
+      return res.status(200).json({ message: "OTP verified successfully" });
+    } else {
+      return res.status(400).json({ message: "Invalid OTP. Please try again." });
+    }
+
+  } catch (error) {
+    console.error("Error during OTP verification:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+
 
 // User login
 app.post("/login", async (req, res) => {
@@ -370,3 +459,8 @@ app.delete("/deletewishlist", async (req, res) => {
 app.listen(8201, () => {
   console.log("Server is running on port 8201");
 });
+
+
+
+
+
