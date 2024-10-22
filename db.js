@@ -173,8 +173,8 @@ app.post("/login", async (req, res) => {
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-
-    const isMatch = await bcrypt.compare(password, user.password);
+if(user.isVerified){
+   const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -184,6 +184,8 @@ app.post("/login", async (req, res) => {
 
     const token = jwt.sign({ userId: user._id }, jwtKEYS, { expiresIn: "4h" });
     return res.status(200).json({ message: "Login successful", token: token, data: userWithoutPassword });
+}
+return res.status(401).json({ message: "Please verify your mail" });
   } catch (error) {
     return res
       .status(500)
