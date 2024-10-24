@@ -305,7 +305,7 @@ app.post("/createwishlist",  async (req, res) => {
 app.get("/wishlist", async (req, res) => {
   try {
     // Assuming user_id is passed as a query parameter
-    const { user_id } = req.query; // Change to req.query if using query parameters
+    const { user_id } = req.body; // Change to req.query if using query parameters
 
     // If user_id is in JSON format, parse it
     // const data = JSON.parse(user_id);
