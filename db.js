@@ -383,6 +383,7 @@ app.get("/getallcart", async (req, res) => {
   }
 });
 
+// Delete a product from cart
 app.delete("/deletecart", async (req, res) => {
   try {
     // Extract product ID from the request body
@@ -399,26 +400,20 @@ app.delete("/deletecart", async (req, res) => {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    // Find the index of the product in the cart items
-    const itemIndex = cart.items.indexOf(product_id);
-    if (itemIndex === -1) {
-      return res.status(404).json({ message: "Product not found in cart" });
-    }
-
     // Remove the product from the cart items
-    cart.items.splice(itemIndex, 1);
+    cart.items = cart.items.filter(item => item.toString() !== product_id);
+
+    // Save the updated cart
     await cart.save();
 
-    return res.status(200).json({ message: "Product removed from cart" });
+    return res.status(200).json({ message: "Product removed from cart", cart });
   } catch (error) {
     return res
       .status(500)
-      .json({
-        message: "Error removing product from cart",
-        error: error.message,
-      });
+      .json({ message: "Error removing product from cart", error: error.message });
   }
 });
+
 
 // Remove product from wishlist
 
