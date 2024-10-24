@@ -305,20 +305,20 @@ app.post("/createwishlist",  async (req, res) => {
 app.get("/wishlist", async (req, res) => {
   try {
     // Assuming user_id is passed as a query parameter
-    const { user_id } = req.body; // Change to req.query if using query parameters
+    const { user_id } = await req.body; // Change to req.query if using query parameters
 
     // If user_id is in JSON format, parse it
     // const data = JSON.parse(user_id);
-    // const userId = data?.data?._id;
+    const userId = user_id
 
     // Fetch the wishlist and populate product details
-    const wishlist = await Wishlist.findOne({ user_id }).populate({
+    const wishlist = await Wishlist.findOne({ userId }).populate({
       path: "items",
       select: "title price image", // Specify which fields to return
     });
 
     if (!wishlist) {
-      return res.status(404).json({ message: "Wishlist not found" });
+      return res.status(404).json({ message: "Wishlist not found"});
     }
 
     // Return the wishlist with populated product details
