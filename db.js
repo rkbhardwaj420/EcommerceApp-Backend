@@ -183,7 +183,7 @@ if(user.isVerified){
     const { password: _, ...userWithoutPassword } = user.toObject();
 
     const token = jwt.sign({ userId: user._id }, jwtKEYS, { expiresIn: "4h" });
-    return res.status(200).json({ message: "Login successful", token: token, data: userWithoutPassword });
+    return res.status(200).json({ message: "Login successful", currentUser: userWithoutPassword._id });
 }
 return res.status(401).json({ message: "Please verify your mail" });
   } catch (error) {
@@ -304,11 +304,15 @@ app.post("/createwishlist",  async (req, res) => {
 
 app.get("/wishlist", async (req, res) => {
   try {
-   const{ user_id } = await req.body;
-    const data = await JSON.parse(user_id)
-    const userId = data?.data._id;
+    // Assuming user_id is passed as a query parameter
+    const { user_id } = req.query; // Change to req.query if using query parameters
+
+    // If user_id is in JSON format, parse it
+    // const data = JSON.parse(user_id);
+    // const userId = data?.data?._id;
+
     // Fetch the wishlist and populate product details
-    const wishlist = await Wishlist.findOne({ userId }).populate({
+    const wishlist = await Wishlist.findOne({ user_id }).populate({
       path: "items",
       select: "title price image", // Specify which fields to return
     });
@@ -326,14 +330,14 @@ app.get("/wishlist", async (req, res) => {
   }
 });
 
+
 // cart api's
 // Create or update cart
 app.post("/createcart", async (req, res) => {
   try {
     // Extract product details from the request body
     const { product_id ,user_id } = await req.body;
-    const data = await JSON.parse(user_id)
-    const userId = data?.data._id;
+    const userId = user_id;
     if (!product_id) return res.status(400).json("Please provide product id");
 
     // Current logged-in user (hardcoded for now)
@@ -367,8 +371,8 @@ app.get("/getallcart", async (req, res) => {
     // Current logged-in user (hardcoded for now)
     // const userId = "66f39b8bb45f445b1af4d178";
     const{user_id } = await req.body;
-    const data = await JSON.parse(user_id)
-    const userId = data?.data._id;
+    const userId = user_id;
+
     // Fetch the cart and populate product details
     const cart = await Cart.findOne({ userId }).populate({
       path: "items",
@@ -393,8 +397,8 @@ app.delete("/deletecart", async (req, res) => {
   try {
     // Extract product ID from the request body
     const { product_id ,user_id } = await req.body;
-    const data = await JSON.parse(user_id)
-    const userId = data?.data._id;
+    const userId = user_id;
+
     if (!product_id) return res.status(400).json("Please provide product id");
 
     // Current logged-in user (hardcoded for now)
@@ -428,8 +432,8 @@ app.delete("/deletewishlist", async (req, res) => {
   try {
     // Extracting product ID from the request body
     const { product_id , user_id } = await req.body;
-    const data = await JSON.parse(user_id)
-    const userId = data?.data._id;
+    const userId = user_id;
+
     if (!product_id) return res.status(400).json("Please provide product id");
 
     // Assuming Aman Sir is the current logged-in user
