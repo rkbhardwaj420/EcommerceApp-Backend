@@ -304,8 +304,9 @@ app.post("/createwishlist",  async (req, res) => {
 
 app.get("/wishlist", async (req, res) => {
   try {
-    const userId = "66f39b8bb45f445b1af4d178"; // You can get this from req.user or req.params dynamically.
-
+   const{ user_id } = await req.body;
+    const data = await JSON.parse(user_id)
+    const userId = data?.data._id;
     // Fetch the wishlist and populate product details
     const wishlist = await Wishlist.findOne({ userId }).populate({
       path: "items",
@@ -330,12 +331,14 @@ app.get("/wishlist", async (req, res) => {
 app.post("/createcart", async (req, res) => {
   try {
     // Extract product details from the request body
-    const { product_id } = req.body;
+    const { product_id ,user_id } = await req.body;
+    const data = await JSON.parse(user_id)
+    const userId = data?.data._id;
     if (!product_id) return res.status(400).json("Please provide product id");
 
     // Current logged-in user (hardcoded for now)
-    const user_id = "66f39b8bb45f445b1af4d178";
-    const cart = await Cart.findOne({ userId: user_id });
+    // const user_id = "66f39b8bb45f445b1af4d178";
+    const cart = await Cart.findOne({ userId: userId });
 
     // If the cart exists, add the product to the cart items
     if (cart) {
@@ -344,7 +347,7 @@ app.post("/createcart", async (req, res) => {
     } else {
       // Create a new cart if it doesn't exist
       const newCart = new Cart({
-        userId: user_id,
+        userId: userId,
         items: [product_id],
       });
       await newCart.save();
@@ -362,8 +365,10 @@ app.post("/createcart", async (req, res) => {
 app.get("/getallcart", async (req, res) => {
   try {
     // Current logged-in user (hardcoded for now)
-    const userId = "66f39b8bb45f445b1af4d178";
-
+    // const userId = "66f39b8bb45f445b1af4d178";
+    const{user_id } = await req.body;
+    const data = await JSON.parse(user_id)
+    const userId = data?.data._id;
     // Fetch the cart and populate product details
     const cart = await Cart.findOne({ userId }).populate({
       path: "items",
@@ -387,14 +392,16 @@ app.get("/getallcart", async (req, res) => {
 app.delete("/deletecart", async (req, res) => {
   try {
     // Extract product ID from the request body
-    const { product_id } = req.body;
+    const { product_id ,user_id } = await req.body;
+    const data = await JSON.parse(user_id)
+    const userId = data?.data._id;
     if (!product_id) return res.status(400).json("Please provide product id");
 
     // Current logged-in user (hardcoded for now)
-    const user_id = "66f39b8bb45f445b1af4d178";
+    // const user_id = "66f39b8bb45f445b1af4d178";
 
     // Find the user's cart
-    const cart = await Cart.findOne({ userId: user_id });
+    const cart = await Cart.findOne({ userId: userId });
 
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
@@ -420,14 +427,16 @@ app.delete("/deletecart", async (req, res) => {
 app.delete("/deletewishlist", async (req, res) => {
   try {
     // Extracting product ID from the request body
-    const { product_id } = req.body;
+    const { product_id , user_id } = await req.body;
+    const data = await JSON.parse(user_id)
+    const userId = data?.data._id;
     if (!product_id) return res.status(400).json("Please provide product id");
 
     // Assuming Aman Sir is the current logged-in user
-    const user_id = "66f39b8bb45f445b1af4d178";
+    // const user_id = "66f39b8bb45f445b1af4d178";
 
     // Finding the wishlist of the user
-    const wishlist = await Wishlist.findOne({ userId: user_id });
+    const wishlist = await Wishlist.findOne({ userId: userId });
 
     if (!wishlist) {
       return res.status(404).json({ message: "Wishlist not found" });
