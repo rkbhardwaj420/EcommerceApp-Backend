@@ -274,18 +274,17 @@ app.post("/createwishlist",  async (req, res) => {
     //product-details
 
     const { product_id , user_id } = await req.body;
-    const data = await JSON.parse(user_id)
-    const userId = data?.data._id;
+
     if (!product_id) return res.status(400).json("Please provide product id");
     //amansir sir current login user
     // const user_id = "66f39b8bb45f445b1af4d178";
-    const wishlist = await Wishlist.findOne({ userId: userId });
+    const wishlist = await Wishlist.findOne({ userId: user_id });
     if (wishlist) {
       wishlist.items.push(product_id);
       await wishlist.save();
     } else {
       const newWishlist = new Wishlist({
-        userId: userId,
+        userId: user_id,
         items: [product_id],
       });
       await newWishlist.save();
