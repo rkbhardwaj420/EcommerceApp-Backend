@@ -303,25 +303,21 @@ app.post("/createwishlist",  async (req, res) => {
 
 app.get("/wishlist", async (req, res) => {
   try {
-    // Assuming user_id is passed as a query parameter
-    const { user_id } = req.query; // Use req.query to retrieve query parameters
+    const { user_id } = req.query; // Retrieve user_id from query
 
-    // Check if user_id is provided
     if (!user_id) {
       return res.status(400).json({ message: "User ID is required" });
     }
 
-    // Fetch the wishlist and populate product details
     const wishlist = await Wishlist.findOne({ userId: user_id }).populate({
       path: "items",
-      select: "title price image", // Specify which fields to return
+      select: "title price image",
     });
 
     if (!wishlist) {
       return res.status(404).json({ message: "Wishlist not found" });
     }
 
-    // Return the wishlist with populated product details
     return res.status(200).json(wishlist);
   } catch (error) {
     return res.status(500).json({
@@ -331,17 +327,21 @@ app.get("/wishlist", async (req, res) => {
   }
 });
 
+
 // cart api's
 // Create or update cart
 app.post("/createcart", async (req, res) => {
   try {
     // Extract product details from the request body
-    const { product_id ,user_id } = await req.body;
+    const { product_id ,user_id , userSelectedData } = await req.body;
     const userId = user_id;
     if (!product_id) return res.status(400).json("Please provide product id");
 
     // Current logged-in user (hardcoded for now)
     // const user_id = "66f39b8bb45f445b1af4d178";
+    const product = await Product.updateOne({ _id: product_id },
+      { $push: { user_choice: userSelectedData } });
+
     const cart = await Cart.findOne({ userId: userId });
 
     // If the cart exists, add the product to the cart items
@@ -353,6 +353,7 @@ app.post("/createcart", async (req, res) => {
       const newCart = new Cart({
         userId: userId,
         items: [product_id],
+
       });
       await newCart.save();
     }
@@ -382,7 +383,7 @@ app.get("/getallcart", async (req, res) => {
     // Fetch the cart and populate product details
     const cart = await Cart.findOne({ userId }).populate({
       path: "items",
-      select: "title price image", // Specify which fields to return
+      select: "title price image user_choice", // Specify which fields to return
     });
 
     if (!cart) {
