@@ -191,6 +191,52 @@ app.post("/mobileOTPverification", async (req, res) => {
 });
 
 
+
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000); // Generate a 6-digit OTP
+
+// Helper function to validate mobile number format (e.g., 10 digits in India)
+const validateMobile = (mobile) => /^[0-9]{10}$/.test(mobile);
+
+app.post("/sendotp", async (req, res) => {
+  try {
+    const { mobile } = req.body;
+
+    // Validate input
+    if (!mobile) {
+      return res.status(400).json({ message: "Mobile number is required" });
+    }
+
+    // Validate mobile number format (e.g., 10 digits)
+    if (!validateMobile(mobile)) {
+      return res.status(400).json({ message: "Invalid mobile number format" });
+    }
+
+    // Check if the mobile number exists (this part assumes that you have a user model)
+    const user = await User.findOne({ mobile });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Generate OTP and update user document
+    const otp = generateOTP();
+    await User.updateOne(
+      { mobile },
+      { $set: { verificationCode: otp, isVerified: false } }
+    );
+
+    // Send OTP via SMS (this is just a simulation)
+    console.log(`Sending OTP ${otp} to ${mobile}`);
+
+    // Simulating a successful OTP sending response
+    return res.status(200).json({ message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+
+
 // User login
 app.post("/login", async (req, res) => {
   try {
