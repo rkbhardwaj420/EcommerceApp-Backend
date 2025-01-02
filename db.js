@@ -157,6 +157,38 @@ app.post("/otpverification", async (req, res) => {
   }
 });
 
+app.post("/mobileOTPverification", async (req, res) => {
+  try {
+    const { mobile, otp } = req.body;
+
+    // Validate input
+    if (!mobile || !otp) {
+      return res.status(400).json({ message: "Mobile number and OTP are required" });
+    }
+
+    // Find user by mobile
+    const user = await User.findOne({ mobile });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if OTP matches
+    if (user.verificationCode === otp) {
+      // Update user's verification status
+      await User.updateOne(
+        { mobile },
+        { $set: { isVerified: true, verificationCode: null } }
+      );
+
+      return res.status(200).json({ message: "OTP verified successfully" });
+    } else {
+      return res.status(400).json({ message: "Invalid OTP. Please try again." });
+    }
+  } catch (error) {
+    console.error("Error during OTP verification:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
 
 
 // User login
