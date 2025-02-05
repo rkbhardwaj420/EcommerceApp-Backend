@@ -11,8 +11,8 @@ import { Order } from "./models/ecommerce/order.models.js"; // Assuming you have
 import { Cart } from "./models/ecommerce/cart.models.js";
 import nodemailer from 'nodemailer';
 
+import { OrderItem } from "./models/ecommerce/orderitem.models.js";
 import crypto from 'crypto';
-import { OrderItem } from "./models/ecommerce/OrderItem.models.js";
 dotenv.config();
 const app = express();
 const jwtKEYS = process.env.JWT_SECRET || "default-secret";
