@@ -26,15 +26,17 @@ const productSchema = new mongoose.Schema({
     },
     stock: {
         type: Number,
-        default: 3,
+        default: 0,
     },
 
     category_details: {
         type: String
     },
+    quantity: {
+         type: Number, default: 1 },
     color: {
         type: Array,
-default: ["Red", "Black", "Green", "White"],
+   default: ["Red", "Black", "Green", "White"],
     },
     user_choice: [userChoiceSchema],
     size: {
@@ -43,7 +45,14 @@ default: ["Red", "Black", "Green", "White"],
     },
     image: {
         type: String
-    }
+    },
+    product_img: {
+        type: [{
+            image: { type: String },
+            color: { type: String }
+        }],
+        default: []
+}
 }, { timestamps: true });
 
 export const Product = mongoose.model('Product', productSchema);

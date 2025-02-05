@@ -1,15 +1,22 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const orderSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  products: [{
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
-    quantity: { type: Number, required: true }
-  }],
-  totalAmount: { type: Number, required: true },
-  status: { type: String, enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'], default: 'Pending' },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+const OrderSchema = new mongoose.Schema({
+  user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  total_amount: { type: Number, required: true },
+  shipping_address: { type: JSON, required: true },
+  order_date: { type: Date, default: Date.now },
+  payment_status: { type: String, enum: ['Paid', 'Unpaid'], default: 'Paid' },
+  payment_method: {
+    type: String,
+    enum: ['Credit Card', 'PayPal', 'COD', 'PhonePe', 'Google Pay'], // Added missing values
+    required: true
+  },
+order_status: {
+    type: String,
+    enum: ['Order Confirmed', 'Seller Processed', 'Picked Up by Courier', 'Shipped', ' Received at Hub','Out for Delivery','Delivered'],default: 'Order Confirmed', // Added missing values
+    required: true
+  },
+  order_items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'OrderItem', required: true }] // Changed from single ObjectId to an array
 });
 
-module.exports = mongoose.model('Order', orderSchema);
+export const Order = mongoose.model("Order", OrderSchema);

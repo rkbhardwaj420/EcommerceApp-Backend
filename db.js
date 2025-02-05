@@ -6,10 +6,13 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Product } from "./models/ecommerce/product.models.js"; // Adjust the path if necessary
 import { User } from "./models/ecommerce/user.models.js"; // Assuming you have a User model defined
-import { Wishlist } from "./models/ecommerce/Wishlist.models.js"; // Assuming you have a User model defined
+import { Wishlist } from "./models/ecommerce/Wishlist.models.js";
+import { Order } from "./models/ecommerce/order.models.js"; // Assuming you have a User model defined
 import { Cart } from "./models/ecommerce/cart.models.js";
 import nodemailer from 'nodemailer';
+
 import crypto from 'crypto';
+import { OrderItem } from "./models/ecommerce/OrderItem.models.js";
 dotenv.config();
 const app = express();
 const jwtKEYS = process.env.JWT_SECRET || "default-secret";
@@ -70,6 +73,70 @@ const SendEmail = async () => {
 
 // Call the function to send the email
 SendEmail();
+
+
+//Orders//
+app.post("/orders", async (req, res) => {
+  try {
+    const { user_id, shipping_address, payment_method, order_items } = req.body;
+
+    if (!user_id || !shipping_address || !payment_method || !order_items.length) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    let total_amount = 0;
+    let processedOrderItems = [];
+
+    for (let item of order_items) {
+      const product = await Product.findById(item.product_id);
+      if (!product) {
+        return res.status(404).json({ message: `Product not found: ${item.product_id}` });
+      }
+
+      let orderItem = new OrderItem({
+        product_id: item.product_id,
+        quantity: item.quantity || 1, // Use provided quantity or default to 1
+        price_per_item: product.price,
+      });
+
+      const savedOrderItem = await orderItem.save(); // Save each OrderItem in the database
+      total_amount += product.price * (item.quantity || 1);
+      processedOrderItems.push(savedOrderItem._id); // Store only ObjectId references
+    }
+
+    // Create the order
+    const newOrder = new Order({
+      user_id,
+      shipping_address,
+      total_amount,
+      payment_method,
+      order_items: processedOrderItems, // Store OrderItem references
+    });
+
+    await newOrder.save();
+    return res.status(201).json({ message: "Order created successfully", order: newOrder });
+
+  } catch (error) {
+    return res.status(500).json({ message: "Error creating order", error: error.message });
+  }
+});
+
+//AllOrders//
+app.get("/getallorders", async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate("user_id", "name email") // Populate user details
+      .populate({
+        path: "order_items",
+        select: "quantity orderitem_date status", // Specify required fields
+        populate: { path: "product_id", select: "title  image " }, // Populate product details
+      });
+
+    return res.status(200).json({ message: "Orders fetched successfully", orders });
+  } catch (error) {
+    return res.status(500).json({ message: "Error fetching orders", error: error.message });
+  }
+});
 
 
 // Create a new user
@@ -408,6 +475,8 @@ app.get("/wishlist", async (req, res) => {
 
 // cart api's
 // Create or update cart
+
+
 app.post("/createcart", async (req, res) => {
   try {
     // Extract product details from the request body
@@ -477,6 +546,52 @@ app.get("/getallcart", async (req, res) => {
   }
 });
 
+app.put("/updatecart/:cartId/item/:productId", async (req, res) => {
+  try {
+    const { cartId, productId } = req.params;
+    const { quantity, userSelectedData } = req.body;
+
+    if (!cartId || !productId) {
+      return res.status(400).json({ message: "Cart ID and Product ID are required" });
+    }
+
+    // Find the user's cart
+    const cart = await Cart.findById(cartId);
+
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    // Check if the product exists in the cart
+    const cartItem = cart.items.find((item) => item.productId.toString() === productId);
+
+    if (!cartItem) {
+      return res.status(404).json({ message: "Product not found in cart" });
+    }
+
+    // Update product quantity
+    if (quantity) {
+      cartItem.quantity = quantity;
+    }
+
+    // Optional: Update user-selected data
+    if (userSelectedData) {
+      await Product.updateOne(
+        { _id: productId },
+        { $set: { user_choice: userSelectedData } }
+      );
+    }
+
+    // Save the updated cart
+    await cart.save();
+
+    return res.status(200).json({ message: "Cart updated successfully", cart });
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating cart", error: error.message });
+  }
+});
+
+
 // Delete a product from cart
 app.delete("/deletecart", async (req, res) => {
   try {
@@ -511,7 +626,7 @@ app.delete("/deletecart", async (req, res) => {
 });
 
 
-// Remove product from wishlist
+
 
 app.delete("/deletewishlist", async (req, res) => {
   try {
