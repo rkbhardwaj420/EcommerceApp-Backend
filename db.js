@@ -4,6 +4,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
 import { Product } from "./models/ecommerce/product.models.js"; // Adjust the path if necessary
 import { User } from "./models/ecommerce/user.models.js"; // Assuming you have a User model defined
 import { Wishlist } from "./models/ecommerce/Wishlist.models.js";
@@ -15,6 +16,7 @@ import { OrderItem } from "./models/ecommerce/orderitem.models.js";
 import crypto from 'crypto';
 dotenv.config();
 const app = express();
+const port = process.env.PORT || 4000 || 8000;
 const jwtKEYS = process.env.JWT_SECRET || "default-secret";
 
 app.use(cors());
@@ -666,7 +668,7 @@ app.delete("/deletewishlist", async (req, res) => {
   }
 });
 
-app.listen(8201, () => {
+app.listen(port, () => {
   console.log("Server is running on port 8201");
 });
 
