@@ -12,7 +12,7 @@ import { Order } from "./models/ecommerce/order.models.js"; // Assuming you have
 import { Cart } from "./models/ecommerce/cart.models.js";
 import nodemailer from 'nodemailer';
 
-import { OrderItem } from "./models/ecommerce/orderitem.models.js";
+import { orderitem } from "./models/ecommerce/orderitem.models.js";
 import crypto from 'crypto';
 dotenv.config();
 const port = process.env.PORT || 8000;
@@ -96,13 +96,13 @@ app.post("/orders", async (req, res) => {
         return res.status(404).json({ message: `Product not found: ${item.product_id}` });
       }
 
-      let orderItem = new OrderItem({
+      let orderitem = new OrderItem({
         product_id: item.product_id,
         quantity: item.quantity || 1, // Use provided quantity or default to 1
         price_per_item: product.price,
       });
 
-      const savedOrderItem = await orderItem.save(); // Save each OrderItem in the database
+      const savedOrderItem = await orderitem.save(); // Save each OrderItem in the database
       total_amount += product.price * (item.quantity || 1);
       processedOrderItems.push(savedOrderItem._id); // Store only ObjectId references
     }
