@@ -15,8 +15,9 @@ import nodemailer from 'nodemailer';
 import { OrderItem } from "./models/ecommerce/orderitem.models.js";
 import crypto from 'crypto';
 dotenv.config();
+const port = process.env.PORT || 8000;
 const app = express();
-const port = process.env.PORT || 4000 || 8000;
+
 const jwtKEYS = process.env.JWT_SECRET || "default-secret";
 
 app.use(cors());
@@ -669,7 +670,7 @@ app.delete("/deletewishlist", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log("Server is running on port 8201");
+  console.log(`Server is running on port  ${port}`);
 });
 
 
