@@ -16,7 +16,7 @@ order_status: {
     enum: ['Order Confirmed', 'Seller Processed', 'Picked Up by Courier', 'Shipped', ' Received at Hub','Out for Delivery','Delivered'],default: 'Order Confirmed', // Added missing values
     required: true
   },
-  order_items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'orderitem', required: true }] // Changed from single ObjectId to an array
+  order_items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'OrderItem', required: true }] // Changed from single ObjectId to an array
 });
 
 export const Order = mongoose.model("Order", OrderSchema);
