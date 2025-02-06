@@ -12,7 +12,9 @@ import { Order } from "./models/ecommerce/order.models.js"; // Assuming you have
 import { Cart } from "./models/ecommerce/cart.models.js";
 import nodemailer from 'nodemailer';
 
-import { OrderItem } from "./models/ecommerce/orderitem.models.js";
+// db.js
+import OrderItem from './models/ecommerce/OrderItem.models.js';  // Adjust the path accordingly
+
 import crypto from 'crypto';
 dotenv.config();
 const port = process.env.PORT || 8000;
@@ -80,67 +82,66 @@ SendEmail();
 
 app.post("/orders", async (req, res) => {
   try {
-    const { user_id, shipping_address, payment_method, order_items } = req.body;
+      const { user_id, shipping_address, payment_method, order_items } = req.body;
 
-    // Validate input fields
-    if (!user_id || !shipping_address || !payment_method || !Array.isArray(order_items) || order_items.length === 0) {
-      return res.status(400).json({ message: "All fields are required and order_items must be an array" });
-    }
-
-    let total_amount = 0;
-    let processedOrderItems = [];
-
-    for (let item of order_items) {
-      const product = await Product.findById(item.product_id);
-      if (!product) {
-        return res.status(404).json({ message: `Product not found: ${item.product_id}` });
+      // Validate required fields
+      if (!user_id || !shipping_address || !payment_method || !order_items.length) {
+          return res.status(400).json({ message: "All fields are required" });
       }
 
-      let orderItem = new OrderItem({
-        product_id: item.product_id,
-        quantity: item.quantity || 1, // Use provided quantity or default to 1
-        price_per_item: product.price,
+      let total_amount = 0;
+      let processedOrderItems = [];
+
+      // Loop through order_items and save OrderItem
+      for (let item of order_items) {
+          const product = await Product.findById(item.product_id); // Fetch product details
+          if (!product) {
+              return res.status(404).json({ message: `Product not found: ${item.product_id}` });
+          }
+
+          // Create OrderItem
+          let orderItem = new OrderItem({
+              product_id: item.product_id,
+              quantity: item.quantity || 1, // Default to 1 if quantity is not provided
+              price_per_item: product.price,
+          });
+
+          const savedOrderItem = await orderItem.save(); // Save OrderItem in database
+          total_amount += product.price * (item.quantity || 1); // Update total amount
+          processedOrderItems.push(savedOrderItem._id); // Add OrderItem reference to processed array
+      }
+
+      // Create the Order
+      const newOrder = new Order({
+          user_id,
+          shipping_address,
+          total_amount,
+          payment_method,
+          order_items: processedOrderItems, // Store references to OrderItems
       });
 
-      const savedOrderItem = await orderItem.save(); // Save each OrderItem in the database
-      total_amount += product.price * (item.quantity || 1);
-      processedOrderItems.push(savedOrderItem._id); // Store only ObjectId references
-    }
-
-    // Create the order
-    const newOrder = new Order({
-      user_id,
-      shipping_address,
-      total_amount,
-      payment_method,
-      order_items: processedOrderItems, // Store OrderItem references
-    });
-
-    await newOrder.save();
-    return res.status(201).json({ message: "Order created successfully", order: newOrder });
+      await newOrder.save(); // Save Order to database
+      return res.status(201).json({ message: "Order created successfully", order: newOrder });
 
   } catch (error) {
-    return res.status(500).json({ message: "Error creating order", error: error.message });
+      return res.status(500).json({ message: "Error creating order", error: error.message });
   }
 });
 
-
+// Fetch All Orders
 app.get("/getallorders", async (req, res) => {
   try {
-    const orders = await orders.find()
-      .populate("user_id", "name email") // Populate user details
-      .populate({
-        path: "order_items",
-        select: "quantity price_per_item", // Specify required fields
-        populate: {
-          path: "product_id",
-          select: "title image", // Populate product details
-        },
-      });
+      const orders = await Order.find()
+          .populate("user_id", "name email") // Populate user details
+          .populate({
+              path: "order_items",
+              select: "quantity orderitem_date status", // Select required fields
+              populate: { path: "product_id", select: "title image price" }, // Populate product details
+          });
 
-    return res.status(200).json({ message: "Orders fetched successfully", orders });
+      return res.status(200).json({ message: "Orders fetched successfully", orders });
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching orders", error: error.message });
+      return res.status(500).json({ message: "Error fetching orders", error: error.message });
   }
 });
 
