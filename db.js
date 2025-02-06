@@ -13,7 +13,7 @@ import { Cart } from "./models/ecommerce/cart.models.js";
 import nodemailer from 'nodemailer';
 
 // db.js
-import OrderItem from './models/ecommerce/OrderItem.models.js';  // Adjust the path accordingly
+import{OrderItem}  from './models/ecommerce/OrderItem.models.js';  // Adjust the path accordingly
 
 import crypto from 'crypto';
 dotenv.config();

@@ -8,6 +8,7 @@ const OrderItemSchema = new mongoose.Schema({
     price_per_item: { type: Number, required: true },
 }, { timestamps: true });
 
-export const OrderItem = mongoose.model('OrderItem', OrderItemSchema);
+export const OrderItem = mongoose.model("OrderItem", OrderItemSchema);
+
 
 
