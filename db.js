@@ -8,11 +8,11 @@ import jwt from "jsonwebtoken";
 import { Product } from "./models/ecommerce/product.models.js"; // Adjust the path if necessary
 import { User } from "./models/ecommerce/user.models.js"; // Assuming you have a User model defined
 import { Wishlist } from "./models/ecommerce/Wishlist.models.js";
-import { Order } from "./models/ecommerce/order.models.js"; // Assuming you have a User model defined
+// import { Order } from "./models/ecommerce/order.models.js"; // Assuming you have a User model defined
 import { Cart } from "./models/ecommerce/cart.models.js";
 import nodemailer from 'nodemailer';
 
-import { OrderItem } from "./models/ecommerce/orderitem.models.js";
+// import { OrderItem } from "./models/ecommerce/orderitem.models.js";
 import crypto from 'crypto';
 dotenv.config();
 const port = process.env.PORT || 8000;
@@ -79,67 +79,67 @@ SendEmail();
 
 
 //Orders//
-app.post("/orders", async (req, res) => {
-  try {
-    const { user_id, shipping_address, payment_method, order_items } = req.body;
+// app.post("/orders", async (req, res) => {
+//   try {
+//     const { user_id, shipping_address, payment_method, order_items } = req.body;
 
-    if (!user_id || !shipping_address || !payment_method || !order_items.length) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
+//     if (!user_id || !shipping_address || !payment_method || !order_items.length) {
+//       return res.status(400).json({ message: "All fields are required" });
+//     }
 
-    let total_amount = 0;
-    let processedOrderItems = [];
+//     let total_amount = 0;
+//     let processedOrderItems = [];
 
-    for (let item of order_items) {
-      const product = await Product.findById(item.product_id);
-      if (!product) {
-        return res.status(404).json({ message: `Product not found: ${item.product_id}` });
-      }
+//     for (let item of order_items) {
+//       const product = await Product.findById(item.product_id);
+//       if (!product) {
+//         return res.status(404).json({ message: `Product not found: ${item.product_id}` });
+//       }
 
-      let orderItem = new OrderItem({
-        product_id: item.product_id,
-        quantity: item.quantity || 1, // Use provided quantity or default to 1
-        price_per_item: product.price,
-      });
+//       let orderItem = new OrderItem({
+//         product_id: item.product_id,
+//         quantity: item.quantity || 1, // Use provided quantity or default to 1
+//         price_per_item: product.price,
+//       });
 
-      const savedOrderItem = await orderItem.save(); // Save each OrderItem in the database
-      total_amount += product.price * (item.quantity || 1);
-      processedOrderItems.push(savedOrderItem._id); // Store only ObjectId references
-    }
+//       const savedOrderItem = await orderItem.save(); // Save each OrderItem in the database
+//       total_amount += product.price * (item.quantity || 1);
+//       processedOrderItems.push(savedOrderItem._id); // Store only ObjectId references
+//     }
 
-    // Create the order
-    const newOrder = new Order({
-      user_id,
-      shipping_address,
-      total_amount,
-      payment_method,
-      order_items: processedOrderItems, // Store OrderItem references
-    });
+//     // Create the order
+//     const newOrder = new Order({
+//       user_id,
+//       shipping_address,
+//       total_amount,
+//       payment_method,
+//       order_items: processedOrderItems, // Store OrderItem references
+//     });
 
-    await newOrder.save();
-    return res.status(201).json({ message: "Order created successfully", order: newOrder });
+//     await newOrder.save();
+//     return res.status(201).json({ message: "Order created successfully", order: newOrder });
 
-  } catch (error) {
-    return res.status(500).json({ message: "Error creating order", error: error.message });
-  }
-});
+//   } catch (error) {
+//     return res.status(500).json({ message: "Error creating order", error: error.message });
+//   }
+// });
 
-//AllOrders//
-app.get("/getallorders", async (req, res) => {
-  try {
-    const orders = await Order.find()
-      .populate("user_id", "name email") // Populate user details
-      .populate({
-        path: "order_items",
-        select: "quantity orderitem_date status", // Specify required fields
-        populate: { path: "product_id", select: "title  image " }, // Populate product details
-      });
+// //AllOrders//
+// app.get("/getallorders", async (req, res) => {
+//   try {
+//     const orders = await Order.find()
+//       .populate("user_id", "name email") // Populate user details
+//       .populate({
+//         path: "order_items",
+//         select: "quantity orderitem_date status", // Specify required fields
+//         populate: { path: "product_id", select: "title  image " }, // Populate product details
+//       });
 
-    return res.status(200).json({ message: "Orders fetched successfully", orders });
-  } catch (error) {
-    return res.status(500).json({ message: "Error fetching orders", error: error.message });
-  }
-});
+//     return res.status(200).json({ message: "Orders fetched successfully", orders });
+//   } catch (error) {
+//     return res.status(500).json({ message: "Error fetching orders", error: error.message });
+//   }
+// });
 
 
 // Create a new user
