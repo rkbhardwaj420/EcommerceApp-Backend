@@ -553,30 +553,23 @@ app.put("/updatecart/:cartId/item/:productId", async (req, res) => {
   try {
     const { cartId, productId } = req.params;
     const { quantity, userSelectedData } = req.body;
-
     if (!cartId || !productId) {
       return res.status(400).json({ message: "Cart ID and Product ID are required" });
     }
-
     // Find the user's cart
     const cart = await Cart.findById(cartId);
-
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
-
     // Check if the product exists in the cart
     const cartItem = cart.items.find((item) => item.productId.toString() === productId);
-
     if (!cartItem) {
       return res.status(404).json({ message: "Product not found in cart" });
     }
-
     // Update product quantity
     if (quantity) {
       cartItem.quantity = quantity;
     }
-
     // Optional: Update user-selected data
     if (userSelectedData) {
       await Product.updateOne(
@@ -584,10 +577,8 @@ app.put("/updatecart/:cartId/item/:productId", async (req, res) => {
         { $set: { user_choice: userSelectedData } }
       );
     }
-
     // Save the updated cart
     await cart.save();
-
     return res.status(200).json({ message: "Cart updated successfully", cart });
   } catch (error) {
     return res.status(500).json({ message: "Error updating cart", error: error.message });
@@ -596,35 +587,26 @@ app.put("/updatecart/:cartId/item/:productId", async (req, res) => {
 
 
 // Delete a product from cart
-app.delete("/deletecart", async (req, res) => {
+app.delete("/deletecart/:userId/item/:productId", async (req, res) => {
   try {
-    // Extract product ID from the request body
-    const { product_id ,user_id } = await req.body;
-    const userId = user_id;
+    const { userId, productId } = req.params;
 
-    if (!product_id) return res.status(400).json("Please provide product id");
-
-    // Current logged-in user (hardcoded for now)
-    // const user_id = "66f39b8bb45f445b1af4d178";
+    if (!productId) return res.status(400).json({ message: "Please provide product ID" });
 
     // Find the user's cart
-    const cart = await Cart.findOne({ userId: userId });
+    const cart = await Cart.findOne({ userId });
 
-    if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
-    }
+    if (!cart) return res.status(404).json({ message: "Cart not found" });
 
-    // Remove the product from the cart items
-    cart.items = cart.items.filter(item => item.toString() !== product_id);
+    // Remove the product from the cart's items array
+    cart.items = cart.items.filter(item => item._id.toString() !== productId);
 
     // Save the updated cart
     await cart.save();
 
     return res.status(200).json({ message: "Product removed from cart", cart });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error removing product from cart", error: error.message });
+    return res.status(500).json({ message: "Error removing product from cart", error: error.message });
   }
 });
 
