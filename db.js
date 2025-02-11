@@ -522,14 +522,17 @@ app.get("/getallcart", async (req, res) => {
     const { user_id } = req.query;
 
 
-    // if (!user_id) {
-    //   return res.status(400).json({ message: "User ID is required" });
-    // }
-
+    if (!user_id) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+// return user_id
     const userId = user_id;
-
     // Fetch the cart and populate product details
-    const cart = await Cart.find();
+    const cart = await Cart.findOne({"user_id":userId}).populate({
+      path: "items.product_id",
+      select: "title price image",
+    });
+
 
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
