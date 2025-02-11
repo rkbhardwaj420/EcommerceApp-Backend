@@ -482,59 +482,54 @@ app.get("/wishlist", async (req, res) => {
 
 app.post("/createcart", async (req, res) => {
   try {
-    // Extract product details from the request body
-    const { product_id ,user_id , userSelectedData } = await req.body;
-    const userId = user_id;
-    if (!product_id) return res.status(400).json("Please provide product id");
+      console.log("Received request body:", req.body);  // Debugging line
 
-    // Current logged-in user (hardcoded for now)
-    // const user_id = "66f39b8bb45f445b1af4d178";
-    const product = await Product.updateOne({ _id: product_id },
-      { $push: { user_choice: userSelectedData } });
+      const { product_id, user_id, userSelectedData } = req.body;
 
-    const cart = await Cart.findOne({ userId: userId });
+      if (!product_id) return res.status(400).json({ message: "Please provide product id" });
 
-    // If the cart exists, add the product to the cart items
-    if (cart) {
-      cart.items.push(product_id);
-      await cart.save();
-    } else {
-      // Create a new cart if it doesn't exist
-      const newCart = new Cart({
-        userId: userId,
-        items: [product_id],
+      const productId = new mongoose.Types.ObjectId(product_id);
+      const userId = new mongoose.Types.ObjectId(user_id);
 
-      });
-      await newCart.save();
-    }
+      // Debugging logs
+      console.log("Converted productId:", productId);
+      console.log("Converted userId:", userId);
 
-    return res.status(201).json({ message: "Product added to cart" });
+      let cart = await Cart.findOne({ user_id: userId });
+
+      if (cart) {
+          cart.items.push({ product_id: productId, quantity: 1 });
+          await cart.save();
+      } else {
+          cart = new Cart({
+              user_id: userId,
+              items: [{ product_id: productId, quantity: 1 }],
+          });
+          await cart.save();
+      }
+
+      return res.status(201).json({ message: "Product added to cart", cart });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error adding product to cart", error: error.message });
+      console.error("Error:", error.message);  // Debugging error
+      return res.status(500).json({ message: "Error adding product to cart", error: error.message });
   }
 });
 
 // Get cart details
 app.get("/getallcart", async (req, res) => {
   try {
-    // Current logged-in user (hardcoded for now)
     // const userId = "66f39b8bb45f445b1af4d178";
-    const { user_id } = req.query; // Use req.query to retrieve query parameters
+    const { user_id } = req.query;
 
-    // Check if user_id is provided
-    if (!user_id) {
-      return res.status(400).json({ message: "User ID is required" });
-    }
+
+    // if (!user_id) {
+    //   return res.status(400).json({ message: "User ID is required" });
+    // }
 
     const userId = user_id;
 
     // Fetch the cart and populate product details
-    const cart = await Cart.findOne({ userId }).populate({
-      path: "items",
-      select: "title price image user_choice", // Specify which fields to return
-    });
+    const cart = await Cart.find();
 
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
