@@ -587,24 +587,24 @@ app.put("/updatecart/:cartId/item/:productId", async (req, res) => {
 // Delete a product from cart
 app.delete("/deletecart/:userId/item/:productId", async (req, res) => {
   try {
-    const { userId, productId } = req.params;
+      const { userId, productId } = req.params;
+      if (!userId || !productId) {
+          return res.status(400).json({ message: "Missing userId or productId" });
+      }
 
-    if (!productId) return res.status(400).json({ message: "Please provide product ID" });
+      const cart = await Cart.findOne({ user_id: userId });
+      if (!cart) {
+          return res.status(404).json({ message: "Cart not found" });
+      }
 
-    // Find the user's cart
-    const cart = await Cart.findOne({ userId });
+      // Remove the product from the cart
+      cart.items = cart.items.filter(item => item.product_id._id.toString() !== productId);
+      await cart.save();
 
-    if (!cart) return res.status(404).json({ message: "Cart not found" });
-
-    // Remove the product from the cart's items array
-    cart.items = cart.items.filter(item => item._id.toString() !== productId);
-
-    // Save the updated cart
-    await cart.save();
-
-    return res.status(200).json({ message: "Product removed from cart", cart });
+      res.status(200).json({ message: "Product removed successfully", cart });
   } catch (error) {
-    return res.status(500).json({ message: "Error removing product from cart", error: error.message });
+      console.error(error);
+      res.status(500).json({ message: "Server error", error });
   }
 });
 
